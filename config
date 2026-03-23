@@ -1,0 +1,167 @@
+# Disable border on terminal window
+
+default_border pixel 1
+default_floating_border pixel 1
+
+# Gaps
+gaps inner 15
+gaps outer 10
+
+
+# font
+font pango:FiraCode Nerd Font 12
+
+# title bar
+for_window [all] title_format "<b>%title</b>"
+title_align center
+
+# black hole colors       border  backgr  text    indicator child_border
+client.focused          #7B5EA7 #151926 #C8C0D8 #E8875B   #7B5EA7
+client.focused_inactive #4A4560 #0B0E14 #C8C0D8 #4A4560   #4A4560
+client.unfocused        #0B0E14 #0B0E14 #4A4560 #0B0E14   #0B0E14
+client.urgent           #E84545 #E84545 #C8C0D8 #E84545   #E84545
+
+# startup
+exec --no-startup-id xrandr --output DP-0 --mode 5120x1440 --rate 240 
+# exec --no-startup-id nitrogen --restore
+exec --no-startup-id xwinwrap -fs -ni -fdt -un -b -nf -ov -- mpv --wid=%WID --no-audio --loop --no-osc --no-osd-bar --panscan=1.0 ~/Wallpapers/black-hole-in-nebula-2.mp4
+exec --no-startup-id sh -c "sleep 10; xset -dpms"
+exec --no-startup-id sh -c "setxkbmap -option caps:escape"
+exec --no-startup-id nm-applet
+exec --no-startup-id steam
+exec --no-startup-id picom --config ~/.config/picom/picom.conf
+
+# variables 
+set $browser google-chrome-stable
+set $term alacritty
+set $up k
+set $down j
+set $left h
+set $right l
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+set $ws5 "5"
+set $ws6 "6"
+set $ws7 "7"
+set $ws8 "8"
+set $ws9 "9"
+set $ws10 "10"
+set $mod Mod1
+set $windows Mod4
+
+# control ceiling fan 
+bindsym $windows+0 exec --no-startup-id ~/scripts/fan0.sh
+bindsym $windows+1 exec --no-startup-id ~/scripts/fan1.sh
+bindsym $windows+2 exec --no-startup-id ~/scripts/fan2.sh
+bindsym $windows+3 exec --no-startup-id ~/scripts/fan3.sh
+
+
+# flip the monitor 
+bindsym $windows+$mod+d exec --no-startup-id ~/scripts/flipMoni.sh
+
+# toggle display mode (solo vs dual monitors)
+bindsym Control+$mod+t exec --no-startup-id ~/scripts/toggle_display_mode.sh
+
+# steam
+bindsym $mod+t exec --no-startup-id steam steam://open/games
+
+# vesktop
+bindsym $mod+Shift+t exec --no-startup-id vesktop
+
+# focus monitors
+bindsym Control+$mod+1 focus output DP-2
+bindsym Control+$mod+2 focus output HDMI-0
+bindsym Control+Shift+$mod+1 focus output DP-2
+bindsym Control+Shift+$mod+2 focus output HDMI-0
+
+# focus workspace
+bindsym Mod1+1 workspace number $ws1
+bindsym Mod1+2 workspace number $ws2
+bindsym Mod1+3 workspace number $ws3
+bindsym Mod1+4 workspace number $ws4
+bindsym Mod1+5 workspace number $ws5
+bindsym Mod1+6 workspace number $ws6
+bindsym Mod1+7 workspace number $ws7
+bindsym Mod1+8 workspace number $ws8
+bindsym Mod1+9 workspace number $ws9
+bindsym Mod1+0 workspace number $ws10
+bindsym Mod1+minus scratchpad show
+
+# focus container
+bindsym $mod+a focus parent
+bindsym $mod+Shift+a focus child
+bindsym $mod+$left focus left
+bindsym $mod+$down focus down
+bindsym $mod+$up focus up
+bindsym $mod+$right focus right
+
+# move container
+bindsym Mod1+Shift+1 move container to workspace number $ws1
+bindsym Mod1+Shift+2 move container to workspace number $ws2
+bindsym Mod1+Shift+3 move container to workspace number $ws3
+bindsym Mod1+Shift+4 move container to workspace number $ws4
+bindsym Mod1+Shift+5 move container to workspace number $ws5
+bindsym Mod1+Shift+6 move container to workspace number $ws6
+bindsym Mod1+Shift+7 move container to workspace number $ws7
+bindsym Mod1+Shift+8 move container to workspace number $ws8
+bindsym Mod1+Shift+9 move container to workspace number $ws9
+bindsym Mod1+Shift+0 move container to workspace number $ws10
+bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+Shift+$left move left
+bindsym $mod+Shift+$down move down
+bindsym $mod+Shift+$up move up
+bindsym $mod+Shift+$right move right
+
+# launch app
+bindsym $mod+q kill
+bindsym $mod+Shift+Return exec i3-sensible-terminal
+bindsym $mod+Return exec --no-startup-id $term
+bindsym $mod+g exec --no-startup-id $browser
+bindsym $mod+d exec --no-startup-id rofi -show drun
+bindsym $mod+f exec --no-startup-id nautilus
+# bindsym $windows+s exec --no-startup-id alacritty -e "pavucontrol"
+# bindsym $windows+e exec --no-startup-id alacritty -e "nvim /home/morris" 
+# bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
+
+# screenshots
+bindsym $windows+s exec --no-startup-id maim | xclip -selection clipboard -t image/png
+bindsym $windows+Shift+s exec --no-startup-id maim -s | xclip -selection clipboard -t image/png
+
+# layout
+bindsym $mod+Tab split h 
+bindsym $mod+v split v
+bindsym $mod+Shift+f fullscreen toggle
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+bindsym $mod+space floating toggle
+bindsym $mod+Shift+space focus mode_toggle
+bindsym Mod1+Shift+r restart
+
+# bar {
+#   status_command i3status
+#   font pango:DejaVu Sans Mono 12
+# }
+
+# Launch polybar
+exec_always --no-startup-id ~/.config/polybar/launch.sh
+
+# volume
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +1% && $refresh_i3status
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -1% && $refresh_i3status
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
+bindsym $mod+m exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
+bindsym $mod+Shift+m exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
+# Toggle Neovide: focus the existing window or launch a new one.
+bindsym $mod+Shift+e exec --no-startup-id ~/scripts/toggle_neovide.sh
+
+# no idea what this is lol
+exec --no-startup-id dex --autostart --environment i3
+set $refresh_i3status killall -SIGUSR1 i3status
+
+exec_always --no-startup-id xrandr --output DP-0 --mode 3840x2160 --rate 240
+
+# Natural scrolling (Mac-style) for touchpad
+exec_always --no-startup-id xinput set-prop "SYNA802E:00 06CB:CFA8 Touchpad" "libinput Natural Scrolling Enabled" 1
