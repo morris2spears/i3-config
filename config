@@ -128,6 +128,9 @@ bindsym $mod+f exec --no-startup-id nautilus
 # bindsym $windows+e exec --no-startup-id alacritty -e "nvim /home/morris" 
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 
+# lock screen
+bindsym Control+$mod+l exec --no-startup-id ~/.config/i3/lock.sh
+
 # screenshots
 bindsym $windows+s exec --no-startup-id maim | xclip -selection clipboard -t image/png
 bindsym $windows+Shift+s exec --no-startup-id maim -s | xclip -selection clipboard -t image/png
