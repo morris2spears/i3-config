@@ -71,8 +71,8 @@ bindsym $mod+t exec --no-startup-id steam steam://open/games
 # vesktop
 bindsym $mod+Shift+t exec --no-startup-id vesktop
 
-# whatsapp
-bindsym $mod+y exec --no-startup-id whatsapp-linux-desktop
+# whatsapp (toggle from scratchpad, launch if not running)
+bindsym $mod+y exec --no-startup-id "pgrep -f whatsapp-linux-desktop && i3-msg '[class=Whatsapp-linux-desktop] scratchpad show' || whatsapp-linux-desktop"
 
 # focus monitors
 bindsym Control+$mod+1 focus output DP-2
@@ -119,7 +119,7 @@ bindsym $mod+Shift+$up move up
 bindsym $mod+Shift+$right move right
 
 # launch app
-bindsym $mod+q kill
+bindsym $mod+q exec --no-startup-id ~/scripts/smart-kill.sh
 bindsym $mod+Shift+Return exec i3-sensible-terminal
 bindsym $mod+Return exec --no-startup-id $term
 bindsym $mod+g exec --no-startup-id $browser
