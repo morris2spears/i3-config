@@ -29,7 +29,7 @@ exec --no-startup-id sh -c "sleep 10; xset -dpms"
 exec --no-startup-id sh -c "setxkbmap -option caps:escape"
 exec --no-startup-id nm-applet
 exec --no-startup-id steam
-exec --no-startup-id whatsapp-desktop
+exec --no-startup-id whatsapp-linux-desktop
 exec --no-startup-id picom --config ~/.config/picom/picom.conf
 
 # variables 
@@ -72,7 +72,7 @@ bindsym $mod+t exec --no-startup-id steam steam://open/games
 bindsym $mod+Shift+t exec --no-startup-id vesktop
 
 # whatsapp
-bindsym $mod+y exec --no-startup-id whatsapp-desktop
+bindsym $mod+y exec --no-startup-id whatsapp-linux-desktop
 
 # focus monitors
 bindsym Control+$mod+1 focus output DP-2
