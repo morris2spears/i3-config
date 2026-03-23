@@ -24,7 +24,7 @@ client.urgent           #E84545 #E84545 #C8C0D8 #E84545   #E84545
 # startup
 exec --no-startup-id xrandr --output DP-0 --mode 5120x1440 --rate 240 
 # exec --no-startup-id nitrogen --restore
-exec --no-startup-id xwinwrap -fs -ni -fdt -un -b -nf -ov -- mpv --wid=%WID --no-audio --loop --no-osc --no-osd-bar --panscan=1.0 ~/Wallpapers/black-hole-in-nebula-2.mp4
+exec --no-startup-id ~/.config/i3/wallpaper-power.sh
 exec --no-startup-id sh -c "sleep 10; xset -dpms"
 exec --no-startup-id sh -c "setxkbmap -option caps:escape"
 exec --no-startup-id nm-applet
