@@ -13,6 +13,10 @@ font pango:FiraCode Nerd Font 12
 
 # title bar
 for_window [all] title_format "<b>%title</b>"
+
+# kill app notification popups (Telegram, Discord, etc.)
+for_window [window_type="notification"] kill
+for_window [class="TelegramDesktop" window_type="utility"] kill
 title_align center
 
 # black hole colors       border  backgr  text    indicator child_border
@@ -70,8 +74,10 @@ bindsym $mod+t exec --no-startup-id steam steam://open/games
 # vesktop
 bindsym $mod+Shift+t exec --no-startup-id vesktop
 
-# whatsapp
-bindsym $mod+y exec --no-startup-id whatsapp-linux-desktop
+# whatsapp (toggle: scratchpad pull / focus / launch)
+bindsym $mod+y exec --no-startup-id ~/.config/i3/scripts/toggle_app.sh title "WhatsApp" "google-chrome-stable --app=https://web.whatsapp.com"
+# telegram (toggle: scratchpad pull / focus / launch)
+bindsym $mod+Shift+y exec --no-startup-id ~/.config/i3/scripts/toggle_app.sh class "TelegramDesktop" "Telegram"
 
 # focus monitors
 bindsym Control+$mod+1 focus output DP-2
@@ -118,7 +124,7 @@ bindsym $mod+Shift+$up move up
 bindsym $mod+Shift+$right move right
 
 # launch app
-bindsym $mod+q kill
+bindsym $mod+q exec --no-startup-id ~/.config/i3/scripts/smart_close.sh
 bindsym $mod+Shift+Return exec i3-sensible-terminal
 bindsym $mod+Return exec --no-startup-id $term
 bindsym $mod+g exec --no-startup-id $browser
