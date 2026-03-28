@@ -39,9 +39,9 @@ exec --no-startup-id Telegram
 
 # auto-hide apps to scratchpad on launch
 for_window [title="WhatsApp"] move scratchpad
+for_window [title="web.whatsapp.com"] move scratchpad
 for_window [class="TelegramDesktop" title="^Telegram"] move scratchpad
 for_window [class="Steam"] move scratchpad
-for_window [class="vesktop"] move scratchpad
 
 # variables 
 set $browser google-chrome-stable
@@ -83,7 +83,7 @@ bindsym $mod+t exec --no-startup-id steam steam://open/games
 bindsym $mod+Shift+t exec --no-startup-id vesktop
 
 # whatsapp (toggle: scratchpad pull / focus / launch)
-bindsym $mod+y exec --no-startup-id ~/.config/i3/scripts/toggle_app.sh title "WhatsApp" "google-chrome-stable --app=https://web.whatsapp.com"
+bindsym $mod+y exec --no-startup-id ~/.config/i3/scripts/toggle_app.sh title "whatsapp" "google-chrome-stable --app=https://web.whatsapp.com"
 # telegram (toggle: scratchpad pull / focus / launch)
 bindsym $mod+Shift+y exec --no-startup-id ~/.config/i3/scripts/toggle_app.sh class "TelegramDesktop" "Telegram"
 
