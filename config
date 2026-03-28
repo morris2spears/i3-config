@@ -34,6 +34,12 @@ exec --no-startup-id sh -c "setxkbmap -option caps:escape"
 exec --no-startup-id nm-applet
 exec --no-startup-id steam
 exec --no-startup-id picom --config ~/.config/picom/picom.conf
+exec --no-startup-id google-chrome-stable --app=https://web.whatsapp.com
+exec --no-startup-id Telegram
+
+# auto-hide WhatsApp and Telegram to scratchpad on launch
+for_window [title="WhatsApp"] move scratchpad
+for_window [class="TelegramDesktop" title="^Telegram"] move scratchpad
 
 # variables 
 set $browser google-chrome-stable
