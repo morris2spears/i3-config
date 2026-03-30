@@ -17,7 +17,7 @@ TREE=$(i3-msg -t get_tree)
 if [ "$MATCH_TYPE" = "class" ]; then
     I3_CRITERIA="[class=\"$MATCH_VALUE\"]"
 else
-    I3_CRITERIA="[title=\"(?i)$MATCH_VALUE\"]"
+    I3_CRITERIA="[title=\"$MATCH_VALUE\"]"
 fi
 
 FOUND=$(echo "$TREE" | python3 -c "
