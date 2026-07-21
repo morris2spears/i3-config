@@ -158,7 +158,8 @@ bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
 bindsym $mod+space floating toggle
 bindsym $mod+Shift+space focus mode_toggle
-bindsym Mod1+Shift+r restart
+# re-apply display layout (fixes stale HDMI after unplug), then restart i3
+bindsym $mod+Shift+r exec --no-startup-id ~/.config/i3/scripts/display-refresh.sh
 
 # bar {
 #   status_command i3status
