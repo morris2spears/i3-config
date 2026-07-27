@@ -42,11 +42,34 @@
 # scrubbing every "love"-bearing word out of heart lines (see drop_love below).
 #
 # The cache filename is version-stamped; bump CACHE_VERSION to force a rebuild.
+#
+# RECENTLY USED
+# -------------
+# Whatever you reached for last is overwhelmingly what you reach for next, so
+# recently picked emoji are moved to the very top of the list. Because rofi
+# only filters and never reorders, PREPENDING THE LINES IS THE ENTIRE RANKING
+# MECHANISM: a recent emoji is first on the unfiltered list, and it is also
+# first among the survivors of any query it happens to match. Nothing else has
+# to know about recency, and the curated block still outranks the unicodedata
+# tail for everything below the recents.
+#
+# The recents file stores BARE EMOJI CHARACTERS, one per line, most recent
+# first -- deliberately not the full display line. Display lines are owned by
+# CACHE_VERSION: bumping it rewrites names and keywords, and a store of stale
+# display lines would then show text that no longer matches the cache (or worse,
+# duplicate an entry whose wording changed). A bare character is the stable
+# identity; it is re-resolved against the current cache on every launch, and a
+# character that no longer appears in the cache is simply skipped.
 
 set -uo pipefail
 
 CACHE_VERSION=5
 CACHE="$HOME/.cache/emoji-list.v${CACHE_VERSION}.txt"
+
+# Recents are versioned independently of the cache: the format here is "one
+# bare emoji per line", and only a change to THAT would need a bump.
+RECENTS="$HOME/.cache/emoji-recents.v1.txt"
+RECENTS_MAX=24
 
 if [ ! -s "$CACHE" ]; then
     mkdir -p "$(dirname "$CACHE")"
@@ -280,12 +303,65 @@ with open(sys.argv[1], "w", encoding="utf-8") as f:
 PY
 fi
 
+# Emit the rofi input: recents resolved against the cache, then the rest of the
+# cache in its original priority order. One awk pass so the cache is read once
+# and recents are matched on an exact field comparison -- an emoji is not a safe
+# regex, and some of them genuinely contain metacharacters.
+build_list() {
+    awk -v recents="$RECENTS" '
+        BEGIN {
+            # Read the recents store first; a missing or empty file just leaves
+            # the wanted[] set empty and the cache is emitted verbatim.
+            while ((getline ch < recents) > 0) {
+                if (ch == "" || (ch in wanted)) continue
+                wanted[ch] = 1
+                order[++nrecent] = ch
+            }
+            close(recents)
+        }
+        {
+            # Field 1 is the emoji, which is exactly what the picker stores.
+            if ($1 in wanted) {
+                if (!($1 in line)) line[$1] = $0   # first hit wins, as in the cache
+                next                               # and it is NOT re-emitted below
+            }
+            rest[++nrest] = $0
+        }
+        END {
+            # Skip recents that no longer resolve (e.g. after a CACHE_VERSION bump
+            # dropped an emoji) rather than printing a bare, unsearchable char.
+            for (i = 1; i <= nrecent; i++)
+                if (order[i] in line) print line[order[i]]
+            for (i = 1; i <= nrest; i++) print rest[i]
+        }
+    ' "$CACHE"
+}
+
+# Move an emoji to the front of the recents store, deduped and capped. Written
+# to a temp file and renamed, so a kill mid-write can never leave a half file.
+record_recent() {
+    local ch=$1 tmp
+    [ -n "$ch" ] || return 0
+    mkdir -p "$(dirname "$RECENTS")" 2>/dev/null
+    tmp=$(mktemp "${RECENTS}.XXXXXX" 2>/dev/null) || return 0
+    {
+        printf '%s\n' "$ch"
+        # Drop the previous occurrence so re-picking promotes instead of duplicating.
+        [ -s "$RECENTS" ] && grep -vxF -e "$ch" -- "$RECENTS"
+    } | grep -v '^[[:space:]]*$' | head -n "$RECENTS_MAX" > "$tmp"
+    mv -f "$tmp" "$RECENTS" 2>/dev/null || rm -f "$tmp"
+}
+
 # Remember the window that was focused before rofi steals focus.
 TARGET=$(xdotool getactivewindow 2>/dev/null)
 
-CHOICE=$(rofi -dmenu -i -matching normal -no-custom -p "emoji" < "$CACHE") || exit 0
+CHOICE=$(build_list | rofi -dmenu -i -matching normal -no-custom -p "emoji") || exit 0
 [ -n "${CHOICE:-}" ] || exit 0
 EMOJI=${CHOICE%% *}
+
+# Every successful pick counts, including one made from the recents section
+# itself (where it just re-confirms position 1).
+record_recent "$EMOJI"
 
 # Clipboard copy as a fallback for anything that refuses synthetic typing.
 printf '%s' "$EMOJI" | xclip -selection clipboard 2>/dev/null
