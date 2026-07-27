@@ -127,10 +127,15 @@ list_rows() {
         | (if ($now - .t) < 43200 then $clock
            else (.t | strflocaltime("%b%d ")) + $clock end) as $time
         | (if .snip == "" then "" else "   " + .snip end) as $s
-        | "\($time)   \(.sum)   [\(.app)]\($s)\t\(.icon)"' \
-    | while IFS=$'\t' read -r text icon; do
+        | "\($time)   \(.sum)   [\(.app)]\($s)\u001e\(.icon)\u001e\(.app)"' \
+    | while IFS=$'\x1e' read -r text icon app; do
+        # bluebubbles writes avatars to a temp dir and deletes them within a
+        # minute, so the stored path is usually dead by now. fall back to the
+        # appname and let rofi resolve it from the icon theme.
         if [ -n "$icon" ] && [ -f "$icon" ]; then
             printf '%s\000icon\x1f%s\n' "$text" "$icon"
+        elif [ -n "$app" ]; then
+            printf '%s\000icon\x1f%s\n' "$text" "$app"
         else
             printf '%s\n' "$text"
         fi
