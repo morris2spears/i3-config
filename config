@@ -220,5 +220,8 @@ set $refresh_i3status killall -SIGUSR1 i3status
 
 exec_always --no-startup-id xrandr --output DP-0 --mode 3840x2160 --rate 240
 
+# Apply closed-lid display layout (eDP off when HDMI + AC) on login/reload
+exec_always --no-startup-id /usr/local/bin/display-hotplug.sh
+
 # Natural scrolling (Mac-style) for touchpad
 exec_always --no-startup-id xinput set-prop "SYNA802E:00 06CB:CFA8 Touchpad" "libinput Natural Scrolling Enabled" 1
