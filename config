@@ -33,6 +33,10 @@ exec --no-startup-id sh -c "sleep 10; xset -dpms"
 exec --no-startup-id sh -c "setxkbmap -option caps:escape"
 exec --no-startup-id nm-applet
 exec --no-startup-id steam -silent
+# mouse back button acts as "go back" inside BlueBubbles only. It observes raw
+# X input without grabbing the button, so back still works normally everywhere
+# else (browser, etc). Button number: BB_BACK_BUTTON, key sent: BB_BACK_KEY.
+exec_always --no-startup-id ~/.config/i3/scripts/bb_back_button.py
 exec --no-startup-id picom --config ~/.config/picom/picom.conf
 exec --no-startup-id google-chrome-stable --app=https://web.whatsapp.com
 
