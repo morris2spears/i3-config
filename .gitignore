@@ -1,0 +1,6 @@
+# local throwaway backups - never commit these
+*.bak
+*.bak-*
+*.bak[0-9]-*
+*.carbon-*
+*.pre-*
