@@ -110,6 +110,11 @@ bindsym $mod+Shift+u exec --no-startup-id ~/.config/i3/scripts/toggle_app.sh cla
 # rename focused window title (manual name)
 bindsym $mod+Shift+n exec --no-startup-id i3-input -F 'exec xdotool getactivewindow set_window --name "%s"' -P 'Window name: '
 
+# Use the mouse thumb wheel as a second vertical scroll wheel.
+# Swap 4 and 5 below if the physical direction feels reversed.
+bindsym --whole-window button6 exec --no-startup-id xdotool click 4
+bindsym --whole-window button7 exec --no-startup-id xdotool click 5
+
 # focus monitors
 bindsym Control+$mod+1 focus output DP-2
 bindsym Control+$mod+2 focus output HDMI-0
