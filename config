@@ -168,6 +168,9 @@ bindsym $mod+Return exec --no-startup-id $term
 bindsym $mod+g exec --no-startup-id $browser
 bindsym $mod+d exec --no-startup-id rofi -show drun
 bindsym $mod+f exec --no-startup-id nautilus
+
+# emoji picker (opens in rofi's search line; types into the focused window)
+bindsym $windows+space exec --no-startup-id ~/.config/i3/scripts/emoji_picker.sh
 # bindsym $windows+s exec --no-startup-id alacritty -e "pavucontrol"
 # bindsym $windows+e exec --no-startup-id alacritty -e "nvim /home/morris" 
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
