@@ -37,9 +37,14 @@ exec --no-startup-id picom --config ~/.config/picom/picom.conf
 exec --no-startup-id google-chrome-stable --app=https://web.whatsapp.com
 
 # auto-hide apps to scratchpad on launch
-for_window [title="WhatsApp"] move scratchpad
-for_window [title="web.whatsapp.com"] move scratchpad
+# NOTE: do NOT add a bare `move scratchpad` rule for whatsapp here. It would run
+# before the instance rule below, and `resize set N ppt` / `move position center`
+# are silent no-ops once a window is already in __i3_scratch (i3 reports success
+# but the percentage resolves against the scratchpad pseudo-workspace). The
+# window then keeps whatever geometry chrome restored, which is why it used to
+# come back half-tiled instead of floating and centred. Size first, hide last.
 for_window [class="TelegramDesktop" title="^Telegram"] move scratchpad
+for_window [instance="(?i)^web\.whatsapp\.com$"] floating enable, resize set 60 ppt 60 ppt, move position center, move scratchpad
 
 # variables 
 set $browser google-chrome-stable
@@ -80,8 +85,12 @@ bindsym $mod+t exec --no-startup-id steam steam://open/games
 # vesktop
 bindsym $mod+Shift+t exec --no-startup-id vesktop
 
-# whatsapp (toggle: scratchpad pull / focus / launch)
-bindsym $mod+y exec --no-startup-id ~/.config/i3/scripts/toggle_app.sh title "whatsapp" "google-chrome-stable --app=https://web.whatsapp.com"
+# whatsapp (toggle: scratchpad pull / hide back / launch)
+# dedicated script, not toggle_app.sh: that one does `floating disable` after
+# `scratchpad show`, which tiles the window instead of leaving it floating, and
+# it matched on the title, which chrome flips between "web.whatsapp.com",
+# "WhatsApp" and "(3) WhatsApp". This matches the stable instance instead.
+bindsym $mod+Shift+y exec --no-startup-id ~/.config/i3/scripts/toggle_whatsapp.sh
 # telegram (moved off $mod+Shift+y, no longer autostarts)
 bindsym $mod+Shift+u exec --no-startup-id ~/.config/i3/scripts/toggle_app.sh class "TelegramDesktop" "Telegram"
 
