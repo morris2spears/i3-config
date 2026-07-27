@@ -59,7 +59,7 @@ for_window [instance="(?i)^web\.whatsapp\.com$"] floating enable, resize set 60 
 
 # variables 
 set $browser google-chrome-stable
-set $term alacritty
+set $term /home/morris/.config/alacritty/term-launch.sh
 set $up k
 set $down j
 set $left h
