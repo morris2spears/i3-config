@@ -44,6 +44,13 @@ exec --no-startup-id google-chrome-stable --app=https://web.whatsapp.com
 # window then keeps whatever geometry chrome restored, which is why it used to
 # come back half-tiled instead of floating and centred. Size first, hide last.
 for_window [class="TelegramDesktop" title="^Telegram"] move scratchpad
+# bluebubbles: starts hidden and $mod+y toggles it, so hiding never kills
+# the process and iMessage notifications keep working
+# bluebubbles/whatsapp size is forced: bluebubbles does not persist window
+# geometry on linux (its window-width/height prefs stay 1280x720 forever), and
+# chrome app windows do not either. 60ppt = 60% of the monitor per axis, so this
+# scales per machine. Fires on window creation only.
+for_window [class="(?i)^bluebubbles$"] floating enable, resize set 60 ppt 60 ppt, move position center, move scratchpad
 for_window [instance="(?i)^web\.whatsapp\.com$"] floating enable, resize set 60 ppt 60 ppt, move position center, move scratchpad
 
 # variables 
@@ -85,6 +92,8 @@ bindsym $mod+t exec --no-startup-id steam steam://open/games
 # vesktop
 bindsym $mod+Shift+t exec --no-startup-id vesktop
 
+# bluebubbles (scratchpad toggle: show / hide; launches if not running)
+bindsym $mod+y exec --no-startup-id ~/.config/i3/scripts/toggle_bluebubbles.sh
 # whatsapp (toggle: scratchpad pull / hide back / launch)
 # dedicated script, not toggle_app.sh: that one does `floating disable` after
 # `scratchpad show`, which tiles the window instead of leaving it floating, and
