@@ -107,6 +107,9 @@ bindsym $mod+Shift+y exec --no-startup-id ~/.config/i3/scripts/toggle_whatsapp.s
 # telegram (moved off $mod+Shift+y, no longer autostarts)
 bindsym $mod+Shift+u exec --no-startup-id ~/.config/i3/scripts/toggle_app.sh class "TelegramDesktop" "Telegram"
 
+# rename focused window title (manual name)
+bindsym $mod+Shift+n exec --no-startup-id i3-input -F 'exec xdotool getactivewindow set_window --name "%s"' -P 'Window name: '
+
 # focus monitors
 bindsym Control+$mod+1 focus output DP-2
 bindsym Control+$mod+2 focus output HDMI-0
