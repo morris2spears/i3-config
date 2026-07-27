@@ -2,7 +2,9 @@
 # If the focused window is a scratchpad app, hide it instead of killing it.
 # Otherwise, kill it normally.
 
-SCRATCHPAD_CLASSES="TelegramDesktop"
+# Bluebubbles is here on purpose: closeToTray is off, so a real kill would end
+# the process and silently stop all iMessage notifications. Hide it instead.
+SCRATCHPAD_CLASSES="TelegramDesktop|Bluebubbles"
 SCRATCHPAD_TITLES="WhatsApp"
 
 WID=$(xdotool getactivewindow 2>/dev/null) || { i3-msg 'kill'; exit; }
