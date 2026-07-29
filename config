@@ -56,6 +56,34 @@ for_window [class="TelegramDesktop" title="^Telegram"] move scratchpad
 # scales per machine. Fires on window creation only.
 for_window [class="(?i)^bluebubbles$"] floating enable, resize set 60 ppt 60 ppt, move position center, move scratchpad
 for_window [instance="(?i)^web\.whatsapp\.com$"] floating enable, resize set 60 ppt 60 ppt, move position center, move scratchpad
+# firstmate ($mod+Shift+i): same 60ppt centred overlay as the two above, and the
+# same mutual exclusion -- showing any one of the three hides the other two.
+# "firstmate" is a WM_CLASS override passed to alacritty at launch, so this
+# matches only that terminal and never an ordinary one.
+#
+# NOTE the deliberate absence of "move scratchpad" here. The other two are up
+# from login to logout, so their toggle scripts never really have to launch
+# anything and it does not matter that this rule would hide a fresh window.
+# firstmate is a terminal the user quits often, so its toggle DOES have to launch
+# and show -- with "move scratchpad" on this line that launch would be swallowed
+# and the keypress would look dead. Hiding at login is done once, explicitly, by
+# start_firstmate_hidden.sh instead.
+for_window [class="(?i)^firstmate$"] floating enable, resize set 60 ppt 60 ppt, move position center
+# spotify ($mod+Shift+s): same 60ppt centred overlay, and the same mutual
+# exclusion -- showing any one of the four hides the other three.
+#
+# No "move scratchpad" here for the same reason as firstmate above: the toggle's
+# "not running" branch has to launch AND SHOW, and this rule fires on every
+# window creation including that one, so hiding here would swallow the launch and
+# make the keypress look dead. Spotify IS pre-warmed at login, but the hiding for
+# that is done once, explicitly, by start_spotify_hidden.sh -- not from here.
+#
+# VERIFIED 2026-07-29 with xprop on main's already-running client: WM_CLASS is
+# "spotify", "Spotify". i3 matches [class=...] against the second field, so the
+# capital S is what is actually being matched here. Kept case-insensitive on
+# purpose -- the casing has moved between releases, and "(?i)^spotify$" is
+# correct either way.
+for_window [class="(?i)^spotify$"] floating enable, resize set 60 ppt 60 ppt, move position center
 
 # variables 
 set $browser google-chrome-stable
@@ -104,6 +132,10 @@ bindsym $mod+y exec --no-startup-id ~/.config/i3/scripts/toggle_bluebubbles.sh
 # it matched on the title, which chrome flips between "web.whatsapp.com",
 # "WhatsApp" and "(3) WhatsApp". This matches the stable instance instead.
 bindsym $mod+Shift+y exec --no-startup-id ~/.config/i3/scripts/toggle_whatsapp.sh
+# spotify (toggle: scratchpad pull / hide back / launch). Pre-warmed hidden at
+# login by start_spotify_hidden.sh, so this is normally a scratchpad pull; the
+# launch branch is the fallback for when that did not run or spotify was quit.
+bindsym $mod+Shift+s exec --no-startup-id ~/.config/i3/scripts/toggle_spotify.sh
 # telegram (moved off $mod+Shift+y, no longer autostarts)
 bindsym $mod+Shift+u exec --no-startup-id ~/.config/i3/scripts/toggle_app.sh class "TelegramDesktop" "Telegram"
 
@@ -165,6 +197,39 @@ bindsym $mod+q exec --no-startup-id ~/.config/i3/scripts/smart_close.sh
 bindsym $mod+Shift+q kill
 bindsym $mod+Shift+Return exec i3-sensible-terminal
 bindsym $mod+Return exec --no-startup-id $term
+# firstmate: attach to the herdr server on mirage over tailscale ssh.
+# --remote starts the server there if it isn't up, and keeps modern terminal
+# features (image paste) that plain ssh + multiplexer drops. detach with ctrl+b q.
+# Toggles a centred floating overlay like $mod+y / $mod+Shift+y do, and hides
+# those two when it comes up. $term is passed through so this machine's DPI
+# wrapper is still used; $mod+q hides this window rather than killing the
+# connection.
+bindsym $mod+Shift+i exec --no-startup-id ~/.config/i3/scripts/toggle_firstmate.sh $term
+
+# Pre-warm firstmate at login so the first $mod+Shift+i is instant instead of
+# waiting on the SSH attach: launches it and hides it in the scratchpad once the
+# window appears. Waits for mirage to be reachable first and quietly creates no
+# window if it never is, so a failed login never parks a dead terminal in the
+# scratchpad. `exec`, not `exec_always` -- an i3 reload must not relaunch it.
+#
+# This sits down here, away from the other exec lines at the top of the file, ON
+# PURPOSE: i3 substitutes variables in file order, so $term is only defined from
+# its `set` line onward. Used any earlier it would pass through as the literal
+# string "$term" and the pre-warm would silently never start.
+exec --no-startup-id ~/.config/i3/scripts/start_firstmate_hidden.sh $term
+
+# Pre-warm spotify at login the same way, so the first $mod+Shift+s of the day is
+# an instant scratchpad pull instead of a cold client start. Launches spotify and
+# moves it to the scratchpad once the window appears -- it cannot rely on the
+# for_window rule to hide it, because that rule deliberately has no "move
+# scratchpad" (the toggle's launch branch has to show the window). Exits silently
+# having created nothing if spotify is not installed. `exec`, not `exec_always`
+# -- an i3 reload must not relaunch it.
+#
+# This one uses no i3 variables, so unlike the firstmate line above its position
+# in the file is not load-bearing; it lives here purely to keep the two pre-warms
+# together.
+exec --no-startup-id ~/.config/i3/scripts/start_spotify_hidden.sh
 bindsym $mod+g exec --no-startup-id $browser
 bindsym $mod+d exec --no-startup-id rofi -show drun
 bindsym $mod+f exec --no-startup-id nautilus
@@ -225,3 +290,11 @@ exec_always --no-startup-id /usr/local/bin/display-hotplug.sh
 
 # Natural scrolling (Mac-style) for touchpad
 exec_always --no-startup-id xinput set-prop "SYNA802E:00 06CB:CFA8 Touchpad" "libinput Natural Scrolling Enabled" 1
+
+# baby-menu (scratchpad toggle: Mod1+Shift+o). Deployed at ~/dev/baby-menu,
+# runs the built output in Linux window mode (frameless compact panel).
+# WM_CLASS verified live on this machine: instance "baby-menu", class "baby-menu".
+# No fixed size here on purpose: Baby Menu owns its responsive bounds.
+for_window [class="^baby-menu$"] floating enable, border pixel 0, move position center, move scratchpad
+exec --no-startup-id sh -c 'cd ~/dev/baby-menu && BABY_MENU_WINDOW_MODE=1 exec ./node_modules/electron/dist/electron . >> /tmp/baby-menu.log 2>&1'
+bindsym $mod+Shift+o [class="^baby-menu$"] scratchpad show

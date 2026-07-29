@@ -1,41 +1,43 @@
 #!/usr/bin/env bash
-# Toggle WhatsApp in and out of the i3 scratchpad.
+# Toggle Spotify in and out of the i3 scratchpad.
 #
-# Same deal as toggle_bluebubbles.sh: the scratchpad does the hiding, so the
-# process is never touched and desktop notifications keep working while it is
-# hidden.
+# Same shape as toggle_bluebubbles.sh / toggle_whatsapp.sh / toggle_firstmate.sh:
+# the scratchpad does the hiding, so the process is never touched and playback
+# keeps running while the window is out of sight. Closing the window instead
+# would end the client and stop the music, which is exactly what we do not want
+# from a show/hide key.
 #
 #   in scratchpad  -> show it
 #   already shown  -> hide it back
 #   not running    -> launch it
 #
-# NOTE: WhatsApp here is a Chrome app window (google-chrome --app=...), so its
-# WM_CLASS is the shared "Google-chrome" -- matching on class would grab any
-# browser window. The stable, unique handle is the instance,
-# WM_CLASS[0] = "web.whatsapp.com" -- always match that, never the class.
-# The title is no good either: it flips between "web.whatsapp.com",
-# "WhatsApp" and "(3) WhatsApp" depending on load state and unread count.
+# NOTE on the criteria: VERIFIED 2026-07-29 with xprop against the live client on
+# main (read-only, on windows that were already open -- nothing was launched to
+# check it): WM_CLASS is "spotify", "Spotify", i.e. instance lowercase and class
+# capitalised. i3 matches [class=...] against the second field, so the anchored
+# case-insensitive match below is what makes this work. Keep it case-insensitive:
+# which field carries which capitalisation has moved between releases before, and
+# "(?i)^spotify$" stays correct either way.
 
 set -uo pipefail
 
-CRITERIA='[instance="(?i)^web\.whatsapp\.com$"]'
-LAUNCH="google-chrome-stable --app=https://web.whatsapp.com"
+CRITERIA='[class="(?i)^spotify$"]'
+LAUNCH="spotify"
 
-# The four overlay scratchpads (whatsapp, bluebubbles, firstmate, spotify) are
+# The four overlay scratchpads (spotify, bluebubbles, whatsapp, firstmate) are
 # mutually exclusive: pulling one out puts the other three away, so they never
 # overlap (they all share the same centred 60ppt geometry, so otherwise one just
 # hides behind another and closing the stack takes several $mod+q presses).
 #
 # This HIDES the other windows, it does not kill them. Every process is
 # deliberately kept alive: notifications keep arriving for the messaging apps
-# while hidden -- that is the whole reason this setup uses the scratchpad
-# instead of closing windows -- firstmate's herdr connection to mirage stays
-# up rather than being torn down with its terminal, and spotify keeps playing.
+# while hidden, firstmate's herdr connection to mirage stays up rather than being
+# torn down with its terminal, and Spotify keeps playing.
 #
 # "move scratchpad" on a window that is already in the scratchpad is a harmless
 # no-op, and it never makes a hidden window visible, so this needs no guard. If
 # an app is not running at all its criteria simply matches nothing.
-OTHERS=('[class="(?i)^bluebubbles$"]' '[class="(?i)^firstmate$"]' '[class="(?i)^spotify$"]')
+OTHERS=('[class="(?i)^bluebubbles$"]' '[instance="(?i)^web\.whatsapp\.com$"]' '[class="(?i)^firstmate$"]')
 hide_other() {
     local o
     for o in "${OTHERS[@]}"; do
@@ -49,7 +51,7 @@ tree = json.load(sys.stdin)
 
 def find(node):
     wp = node.get('window_properties') or {}
-    if (wp.get('instance') or '').lower() == 'web.whatsapp.com':
+    if (wp.get('class') or '').lower() == 'spotify':
         return node
     for n in node.get('nodes', []) + node.get('floating_nodes', []):
         r = find(n)
@@ -91,11 +93,20 @@ case "$STATE" in
         ;;
     visible)
         # Sitting on a normal workspace (e.g. dragged out by hand): put it away.
-        # Nothing to do about the others here -- we are hiding, not revealing.
+        # Nothing to do about the other three here -- we are hiding, not revealing.
         i3-msg "$CRITERIA move scratchpad" >/dev/null
         ;;
     none)
-        # No WhatsApp window exists at all, so the app is not running.
+        # No Spotify window exists at all, so the app is not running.
+        #
+        # This branch must LAUNCH AND SHOW, which is why Spotify's for_window rule
+        # sizes and centres but deliberately does NOT end in "move scratchpad" the
+        # way bluebubbles' and whatsapp's rules do -- same reasoning as firstmate.
+        # The keypress would look dead if the rule swallowed the new window.
+        #
+        # start_spotify_hidden.sh pre-warms Spotify hidden at login, so in normal
+        # use this branch is the fallback: it fires when that did not run (or
+        # found nothing to launch) or when Spotify has since been quit.
         hide_other
         exec $LAUNCH
         ;;

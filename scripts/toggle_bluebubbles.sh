@@ -23,19 +23,27 @@ set -uo pipefail
 CRITERIA='[class="(?i)^bluebubbles$"]'
 LAUNCH="$HOME/.local/bin/bluebubbles"
 
-# The two messaging scratchpads are mutually exclusive: pulling one out puts the
-# other away, so they never overlap (they share the same centred 60ppt geometry,
-# so otherwise one just hides behind the other).
+# The four overlay scratchpads (bluebubbles, whatsapp, firstmate, spotify) are
+# mutually exclusive: pulling one out puts the other three away, so they never
+# overlap (they all share the same centred 60ppt geometry, so otherwise one just
+# hides behind another and closing the stack takes several $mod+q presses).
 #
-# This HIDES the other window, it does not kill it. Both processes are
-# deliberately kept alive so notifications keep arriving while hidden -- that is
-# the whole reason this setup uses the scratchpad instead of closing windows.
+# This HIDES the other windows, it does not kill them. Every process is
+# deliberately kept alive: notifications keep arriving for the messaging apps
+# while hidden -- that is the whole reason this setup uses the scratchpad
+# instead of closing windows -- firstmate's herdr connection to mirage stays
+# up rather than being torn down with its terminal, and spotify keeps playing.
 #
 # "move scratchpad" on a window that is already in the scratchpad is a harmless
 # no-op, and it never makes a hidden window visible, so this needs no guard. If
-# WhatsApp is not running at all the criteria simply matches nothing.
-OTHER='[instance="(?i)^web\.whatsapp\.com$"]'
-hide_other() { i3-msg "$OTHER move scratchpad" >/dev/null 2>&1 || true; }
+# an app is not running at all its criteria simply matches nothing.
+OTHERS=('[instance="(?i)^web\.whatsapp\.com$"]' '[class="(?i)^firstmate$"]' '[class="(?i)^spotify$"]')
+hide_other() {
+    local o
+    for o in "${OTHERS[@]}"; do
+        i3-msg "$o move scratchpad" >/dev/null 2>&1 || true
+    done
+}
 
 STATE=$(i3-msg -t get_tree | python3 -c "
 import sys, json
@@ -85,7 +93,7 @@ case "$STATE" in
         ;;
     visible)
         # Sitting on a normal workspace (e.g. dragged out by hand): put it away.
-        # Nothing to do about WhatsApp here -- we are hiding, not revealing.
+        # Nothing to do about the others here -- we are hiding, not revealing.
         i3-msg "$CRITERIA move scratchpad" >/dev/null
         ;;
     none)
